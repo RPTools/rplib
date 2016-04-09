@@ -35,7 +35,7 @@ spotless {
 	format 'misc', {
 		target '**/*.gradle', '**/*.md', '**/.gitignore'
 
-		 spotless has built-in rules for the most basic formatting tasks
+		// spotless has built-in rules for the most basic formatting tasks
 		trimTrailingWhitespace()
 		indentWithTabs() // or spaces. Takes an integer argument if you don't like 4
 	}
@@ -117,23 +117,12 @@ repositories {
 * Gets the version name from the latest Git tag
 */
 def getVersionName() {
-<<<<<<< HEAD
 	if (project.hasProperty('buildVersion')) {
 		return buildVersion
 	} else {
 		String vtxtVersionNo = new File('build-resources/version.txt').text.trim()
 		return vtxtVersionNo
 	}
-=======
-
-    if (project.hasProperty('buildVersion')) {
-        return buildVersion
-    } else {
-        String vtxtVersionNo = new File('build-resources/version.txt').text.trim()
-
-        return vtxtVersionNo
-    }
->>>>>>> 0d03dd8caec7cd41f82ce5a51b008a6b574a8a77
 }
 
 findbugs {
