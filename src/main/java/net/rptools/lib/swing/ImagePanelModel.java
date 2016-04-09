@@ -31,6 +31,8 @@ public interface ImagePanelModel {
 
 	public String getCaption(int index);
 
+	public String getCaption(int index, boolean withDimensions);
+
 	public Paint getBackground(int index);
 
 	public Image[] getDecorations(int index);

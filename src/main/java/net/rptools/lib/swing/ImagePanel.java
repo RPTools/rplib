@@ -34,6 +34,8 @@ import java.awt.dnd.DragSourceListener;
 import java.awt.dnd.DragSourceMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -120,8 +122,22 @@ public class ImagePanel extends JComponent implements Scrollable, DragGestureLis
 	public void setModel(ImagePanelModel model) {
 		this.model = model;
 		revalidate();
-		JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+		final JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+
 		if (scrollPane != null) {
+			scrollPane.addMouseWheelListener(new MouseWheelListener() {
+				public void mouseWheelMoved(MouseWheelEvent e) {
+					if (SwingUtil.isControlDown(e) || e.isMetaDown()) {
+						e.consume();
+						int steps = e.getWheelRotation();
+						setGridSize(gridSize + steps);
+						scrollPane.setWheelScrollingEnabled(false);
+					} else {
+						scrollPane.setWheelScrollingEnabled(true);
+					}
+				}
+			});
+
 			scrollPane.revalidate();
 			scrollPane.repaint();
 		}
@@ -329,10 +345,12 @@ public class ImagePanel extends JComponent implements Scrollable, DragGestureLis
 
 	@Override
 	public String getToolTipText(MouseEvent event) {
-		if (getModel() == null) {
+		if (getModel() == null || getIndex(event.getX(), event.getY()) == -1) {
 			return null;
 		}
-		return getModel().getCaption(getIndex(event.getX(), event.getY()));
+
+		// Jamz: Updated tooltip to include image Dimensions...
+		return getModel().getCaption(getIndex(event.getX(), event.getY()), true);
 	}
 
 	// SCROLLABLE
@@ -420,7 +438,7 @@ public class ImagePanel extends JComponent implements Scrollable, DragGestureLis
 		if (!SwingUtil.isControlDown(e) || selectionMode == SelectionMode.SINGLE) {
 			selectedIDList.clear();
 		}
-		if (imageID != null) {
+		if (imageID != null && !selectedIDList.contains(imageID)) {
 			selectedIDList.add(imageID);
 			repaint();
 		}
