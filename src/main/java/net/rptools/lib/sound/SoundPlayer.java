@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javazoom.jl.decoder.JavaLayerException;
@@ -28,6 +29,7 @@ public class SoundPlayer {
 
 	private static ExecutorService playerThreadPool = Executors.newCachedThreadPool();
 	private static AtomicInteger playerCount = new AtomicInteger();
+	public static final String FILE_EXTENSION = "mp3";
 
 	public static void play(File file) throws IOException {
 		try {
@@ -59,6 +61,16 @@ public class SoundPlayer {
 		}
 	}
 
+	public static int stopAll() {
+		int currentThreads = playerCount.get();
+		playerThreadPool.shutdownNow();
+		System.out.println("Shutdown? " + playerThreadPool.isShutdown());
+		playerThreadPool.shutdown();
+		System.out.println("Terminated? " + playerThreadPool.isTerminated());
+
+		return currentThreads;
+	}
+
 	/**
 	 * Wait for all sounds to stop playing (Mostly for testing purposes)
 	 */
@@ -78,7 +90,8 @@ public class SoundPlayer {
 	private static void play(final Player player) {
 		playerCount.incrementAndGet();
 
-		playerThreadPool.submit(new Runnable() {
+		//Not sure how to use Future here?
+		Future<?> f = playerThreadPool.submit(new Runnable() {
 			public void run() {
 				try {
 					player.play();
