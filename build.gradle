@@ -86,7 +86,6 @@ buildscript {
 
 
 dependencies {
-	compile 'rhino:js:1.6R5'
 	compile 'antlr:antlr:2.7.6'
 	compile 'commons-io:commons-io:2.4'
 	compile 'com.thoughtworks.xstream:xstream:1.4.1'
