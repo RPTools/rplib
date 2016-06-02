@@ -95,6 +95,10 @@ public class ImagePanel extends JComponent implements Scrollable, DragGestureLis
 		repaint();
 	}
 
+	public int getGridSize() {
+		return gridSize;
+	}
+
 	public void setDraggingEnabled(boolean enabled) {
 		isDraggingEnabled = enabled;
 	}
@@ -125,19 +129,7 @@ public class ImagePanel extends JComponent implements Scrollable, DragGestureLis
 		final JScrollPane scrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
 
 		if (scrollPane != null) {
-			scrollPane.addMouseWheelListener(new MouseWheelListener() {
-				public void mouseWheelMoved(MouseWheelEvent e) {
-					if (SwingUtil.isControlDown(e) || e.isMetaDown()) {
-						e.consume();
-						int steps = e.getWheelRotation();
-						setGridSize(gridSize + steps);
-						scrollPane.setWheelScrollingEnabled(false);
-					} else {
-						scrollPane.setWheelScrollingEnabled(true);
-					}
-				}
-			});
-
+			scrollPane.setWheelScrollingEnabled(true);
 			scrollPane.revalidate();
 			scrollPane.repaint();
 		}
