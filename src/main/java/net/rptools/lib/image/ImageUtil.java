@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import org.apache.commons.io.FileUtils;
@@ -90,6 +91,10 @@ public class ImageUtil {
 			dataStream.write(bite);
 		}
 		return bytesToImage(dataStream.toByteArray());
+	}
+
+	public static Image getImage(String image, int w, int h) throws IOException {
+		return resizeImage(getImage(image), w, h);
 	}
 
 	public static BufferedImage getCompatibleImage(String image) throws IOException {
@@ -395,5 +400,27 @@ public class ImageUtil {
 		wig.dispose();
 
 		return workImage;
+	}
+
+	/*
+	 * Jamz: Some common image utility methods
+	 */
+	public static ImageIcon resizeImage(ImageIcon imageIcon) {
+		// Default to 30x30 w/h not passed
+		return resizeImage(imageIcon, 30, 30);
+	}
+
+	public static ImageIcon resizeImage(ImageIcon imageIcon, int w, int h) {
+		return new ImageIcon(imageIcon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH));
+	}
+
+	public static Image resizeImage(Image image) {
+		// Default to 30x30 w/h not passed
+		return resizeImage(image, 30, 30);
+	}
+
+	public static Image resizeImage(Image image, int w, int h) {
+		// Default to 30x30 w/h not passed
+		return image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
 	}
 }

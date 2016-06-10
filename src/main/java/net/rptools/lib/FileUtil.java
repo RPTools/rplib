@@ -524,4 +524,18 @@ public class FileUtil {
 	public static void delete(File file) {
 		FileUtils.deleteQuietly(file);
 	}
+
+	/**
+	 * Replace invalid File name characters, useful for token Save function to
+	 * replace the : in Lib tokens.
+	 * 
+	 * @author Jamz
+	 * @since 1.4.0.2
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static String stripInvalidCharacters(String fileName) {
+		return fileName = fileName.replaceAll("[^\\w\\s.,-]", "_");
+	}
 }
