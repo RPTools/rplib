@@ -133,7 +133,9 @@ public class SwingUtil {
 		int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
 		int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 
-		innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
+		// Jamz: For multiple monitor's, x & y can be negative values...
+		// innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
+		innerWindow.setLocation(x, y);
 	}
 
 	public static void constrainTo(Dimension dim, int size) {
