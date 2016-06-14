@@ -228,7 +228,7 @@ public class PackedFile {
 				r = getFileAsReader(CONTENT_FILE);
 				String xml = IOUtils.toString(r);
 				xml = versionManager.transform(xml, fileVersion);
-				xstream.ignoreUnknownElements();  // Jamz: Should we use this? This will ignore new classes/fields added.
+				xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields added.
 				return xstream.fromXML(xml);
 			} else {
 				return getFileObject(CONTENT_FILE);
@@ -555,7 +555,7 @@ public class PackedFile {
 		LineNumberReader r = getFileAsReader(path);
 		Object o = null;
 		try {
-			xstream.ignoreUnknownElements();  // Jamz: Should we use this? This will ignore new classes/fields added.		
+			xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields added.		
 			o = xstream.fromXML(r);
 		} catch (InstantiationError ie) {
 			log.error("Found at line number " + r.getLineNumber());
