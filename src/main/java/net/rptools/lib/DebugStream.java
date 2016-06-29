@@ -26,7 +26,7 @@ public class DebugStream extends PrintStream {
 		if (debugOn) {
 			showLocation();
 		}
-		
+
 		super.println(x);
 	}
 
@@ -35,7 +35,7 @@ public class DebugStream extends PrintStream {
 		if (debugOn) {
 			showLocation();
 		}
-		
+
 		super.println(x);
 	}
 
