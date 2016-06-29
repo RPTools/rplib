@@ -25,16 +25,18 @@ public class DebugStream extends PrintStream {
 	public void println(Object x) {
 		if (debugOn) {
 			showLocation();
-			super.println(x);
 		}
+		
+		super.println(x);
 	}
 
 	@Override
 	public void println(String x) {
 		if (debugOn) {
 			showLocation();
-			super.println(x);
 		}
+		
+		super.println(x);
 	}
 
 	private void showLocation() {
