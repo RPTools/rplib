@@ -196,7 +196,7 @@ public class ColorPicker extends JPanel {
 	}
 
 	public void setSquareCapSelected(boolean selected) {
-		squareCapToggle.setSelected(!selected);
+		squareCapToggle.setSelected(selected);
 	}
 
 	public void setTranslucency(int percent) {

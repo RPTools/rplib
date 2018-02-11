@@ -1450,6 +1450,7 @@
                   </object>
                  </at>
                  <at name="name">toggelSquareCap</at>
+                 <at name="toolTipText">Line type</at>
                  <at name="width">70</at>
                  <at name="horizontalTextPosition">0</at>
                  <at name="height">15</at>
