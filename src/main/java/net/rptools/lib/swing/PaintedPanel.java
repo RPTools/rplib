@@ -72,6 +72,7 @@ public class PaintedPanel extends JPanel {
 				((Graphics2D) g).setPaint(tp);
 				g.fillRect(0, 0, size.width, size.height);
 			} catch (IOException e) {
+				System.out.println(e.getMessage());
 				g.setColor(Color.white);
 				g.fillRect(0, 0, size.width, size.height);
 				g.setColor(Color.red);
