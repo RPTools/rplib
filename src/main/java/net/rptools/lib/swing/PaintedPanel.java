@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.TexturePaint;
@@ -26,13 +27,12 @@ import java.io.IOException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class PaintedPanel extends JPanel {
-
-	private final URL urlTexture = PaintedPanel.class.getResource("/net/rptools/lib/image/icons/transparent2.png");
-
+	
 	private Paint paint;
 
 	public PaintedPanel() {
@@ -67,7 +67,7 @@ public class PaintedPanel extends JPanel {
 		} else {
 			try {
 				BufferedImage texture;
-				texture = ImageIO.read(new File(urlTexture.getFile()));
+				texture = ImageIO.read(getClass().getResource("/net/rptools/lib/image/icons/transparent2.png"));
 				TexturePaint tp = new TexturePaint(texture, new Rectangle(0, 0, 28, 28));
 				((Graphics2D) g).setPaint(tp);
 				g.fillRect(0, 0, size.width, size.height);
