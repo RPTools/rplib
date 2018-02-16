@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class PaintedPanel extends JPanel {
-	
+
 	private Paint paint;
 
 	public PaintedPanel() {
