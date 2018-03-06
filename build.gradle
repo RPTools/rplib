@@ -34,7 +34,7 @@ configurations {
 
 
 task wrapper(type: Wrapper) {
-    gradleVersion='2.1'
+    gradleVersion='4.5.1'
 }
 
 install {
@@ -75,7 +75,7 @@ dependencies {
     compile 'rhino:js:1.6R5'
     compile 'antlr:antlr:2.7.6'
     compile 'commons-io:commons-io:2.0'
-    compile 'com.thoughtworks.xstream:xstream:1.4.1'
+    compile 'com.thoughtworks.xstream:xstream:1.4.10'
     compile 'commons-lang:commons-lang:2.6'
     compile 'commons-logging:commons-logging:1.1.1'
     compile 'commons-net:commons-net:3.2'
