@@ -118,7 +118,7 @@ repositories {
 def pomConfig = {
     licenses {
         license {
-            name "The General Public License, v3.0"
+            name "The General Public License, v2.0"
             url "http://www.gnu.org/licenses/"
             distribution "repo"
         }
@@ -174,8 +174,13 @@ bintray {
         userOrg = 'rptools' // result is '.../rptools/RPTools/rplib'
         repo = 'RPTools'
         name = 'rplib'
+
+        // The rest of these are supposed to establish the contents of
+        // the various fields at the bintray site, but so far they
+        // haven't seemed to propagate.  Will figure out why at some
+        // point (but I have hand-edited the 1419 details).
         desc = 'General library of RP-appropriate functionality'
-        licenses = ['GPL-3.0']
+        licenses = ['GPL-2.0']
         websiteUrl = 'http://github.com/RPTools/rplib'
         issueTrackerUrl = 'http://github.com/RPTools/rplib/issues'
         vcsUrl = 'https://github.com/RPTools/rplib.git'
