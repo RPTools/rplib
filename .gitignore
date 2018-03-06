@@ -1,5 +1,6 @@
 .gradle
 build/
+bin/
 maven-repo/
 
 # OS generated files
@@ -33,3 +34,7 @@ out/
 .settings/
 .classpath
 .history
+
+# Local gradle files and properties
+################################################################################
+gradle.properties

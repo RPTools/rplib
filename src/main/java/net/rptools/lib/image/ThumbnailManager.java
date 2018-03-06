@@ -25,7 +25,6 @@ import javax.imageio.ImageIO;
 
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
-
 import org.apache.commons.io.FileUtils;
 
 public class ThumbnailManager {
@@ -35,6 +34,14 @@ public class ThumbnailManager {
 	public ThumbnailManager(File thumbnailLocation, Dimension thumbnailSize) {
 		this.thumbnailLocation = thumbnailLocation;
 		this.thumbnailSize = thumbnailSize;
+	}
+
+	public File getThumbnailLocation() {
+		return thumbnailLocation;
+	}
+
+	public Dimension getThumbnailSize() {
+		return thumbnailSize;
 	}
 
 	public Image getThumbnail(File file) throws IOException {
@@ -53,16 +60,17 @@ public class ThumbnailManager {
 		if (thumbnailFile.exists()) {
 			return ImageUtil.getImage(thumbnailFile);
 		}
-		Image image = ImageUtil.getImage(file);
 
-		// Should we bother making a thumbnail ?
-		if (file.length() < 30 * 1024) {
+		Image image = ImageUtil.getImage(file);
+		Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
+
+		// Test if we Should we bother making a thumbnail ?
+		// Jamz: New size 100k (was 30k) and put in check so we're not creating thumbnails LARGER than the original...
+		if (file.length() < 102400 || (imgSize.width <= thumbnailSize.width && imgSize.height <= thumbnailSize.height)) {
 			return image;
 		}
 		// Transform the image
-		Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
-		SwingUtil.constrainTo(imgSize, thumbnailSize.width, thumbnailSize.height);
-
+		SwingUtil.constrainTo(imgSize, Math.min(image.getWidth(null), thumbnailSize.width), Math.min(image.getHeight(null), thumbnailSize.height));
 		BufferedImage thumbnailImage = new BufferedImage(imgSize.width, imgSize.height, ImageUtil.pickBestTransparency(image));
 
 		Graphics2D g = thumbnailImage.createGraphics();
@@ -74,6 +82,17 @@ public class ThumbnailManager {
 		FileUtils.writeByteArrayToFile(thumbnailFile, ImageUtil.imageToBytes(thumbnailImage, "png"));
 
 		return thumbnailImage;
+	}
+
+	public void clearImageThumbCache() {
+		try {
+			if (thumbnailLocation != null) {
+				FileUtils.cleanDirectory(thumbnailLocation);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private BufferedImage getCachedThumbnail(File file) {

@@ -2,66 +2,13 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 import org.ajoberstar.grgit.*
 
-
-
-apply plugin: 'java'
-apply plugin: 'findbugs'
-apply plugin: 'pmd'
-apply plugin: 'maven'
-apply plugin: 'com.diffplug.gradle.spotless'
-
-
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
-
-if (version == 'unspecified') {
-    version = getVersionName()
-}
-
-ext.repo = Grgit.open(project.file('.'))
-
-
-spotless {
-    java {
-        eclipseFormatFile 'build-resources/eclipse.prefs.formatter.xml'
-    }
-}
-
-
-configurations {
-    deployerJars
-}
-
-
-task wrapper(type: Wrapper) {
-    gradleVersion='4.5.1'
-}
-
-install {
-    repositories.mavenInstaller {
-        pom.version = project.version;
-        pom.artifactId = 'rplib';
-        pom.groupId = 'net.rptools.rplib';
-    }
-}
-
-
-uploadArchives {
-    repositories.mavenDeployer {
-        pom.version = project.version;
-        pom.artifactId = 'rplib';
-        pom.groupId = 'net.rptools.rplib';
-        configuration = configurations.deployerJars;
-        repository url: 'file://' + projectDir + '/../maven-repo'
-    }
-}
-
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
         jcenter()
         maven {
-            url 'https://plugins.gradle.org/m2/'
+            url "http://maptool.craigs-stuff.net/repo/"
         }
     }
     dependencies {
@@ -70,11 +17,80 @@ buildscript {
     }
 }
 
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+    id "maven-publish"
+    id "java-library"   // Solution for gradle issue#1118
+    id 'java'
+    id 'findbugs'
+    id 'pmd'
+    id 'maven'
+    id 'com.diffplug.gradle.spotless' version "1.3.0"
+    id 'eclipse'
+}
+
+configurations { ftpAntTask }
 
 dependencies {
-    compile 'rhino:js:1.6R5'
+    ftpAntTask("org.apache.ant:ant-commons-net:1.9.4") {
+        module("commons-net:commons-net:1.4.1") {
+            dependencies "oro:oro:2.0.8:jar"
+        }
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+if (version == 'unspecified') {
+    version = getVersionName()
+}
+
+ext.repo = Grgit.open(project.file('.'))
+
+spotless {
+    java {
+        eclipseFormatFile 'build-resources/eclipse.prefs.formatter.xml'
+    }
+
+    format 'misc', {
+        target '**/*.gradle', '**/*.md', '**/.gitignore'
+
+        // spotless has built-in rules for the most basic formatting tasks
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+    }
+}
+
+configurations {
+    deployerJars
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5.1'
+}
+
+//install {
+//    repositories.mavenInstaller {
+//        pom.version = project.version;
+//        pom.artifactId = 'rplib';
+//        pom.groupId = 'net.rptools.rplib';
+//    }
+//}
+//
+//uploadArchives {
+//    repositories.mavenDeployer {
+//        pom.version = project.version;
+//        pom.artifactId = 'rplib';
+//        pom.groupId = 'net.rptools.rplib';
+//        configuration = configurations.deployerJars;
+//        repository url: 'file://' + projectDir + '/../maven-repo'
+//    }
+//}
+
+dependencies {
     compile 'antlr:antlr:2.7.6'
-    compile 'commons-io:commons-io:2.0'
+    compile 'commons-io:commons-io:2.4'
     compile 'com.thoughtworks.xstream:xstream:1.4.10'
     compile 'commons-lang:commons-lang:2.6'
     compile 'commons-logging:commons-logging:1.1.1'
@@ -90,27 +106,120 @@ dependencies {
 ext.compileDate = new Date();
 ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
-
 repositories {
     mavenLocal()
     mavenCentral()
+    jcenter()
     maven {
-        url = 'http://maptool.craigs-stuff.net/repo/'
+        url "http://maptool.craigs-stuff.net/repo/"
     }
 }
 
+def pomConfig = {
+    licenses {
+        license {
+            name "The General Public License, v2.0"
+            url "http://www.gnu.org/licenses/"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "rptools"
+            name "rptools"
+            email "support@rptools.net"
+        }
+    }
+
+    scm {
+        url "https://github.com/RPTools/rplib"
+    }
+}
+
+publishing {
+    publications {
+        bintrayPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            artifactId = 'rplib'
+            version    = getVersionName()
+            groupId    = 'net.rptools.rplib';
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'RPTools general lib')
+                root.appendNode('name', 'RP Lib')
+                root.appendNode('url', 'https://github.com/RPTools/rplib')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    String publishProperty = System.getProperty('publish')
+    publications = ['bintrayPublication']
+
+    //Whether to run this as dry-run, without deploying
+    dryRun = false
+
+    //Whether version should be auto published after an upload
+    publish = (publishProperty == "true")
+    println "Publishing uploaded files:  " + publish
+
+    //Whether to override version artifacts already published
+    override = true
+
+    pkg {
+        userOrg = 'rptools' // result is '.../rptools/RPTools/rplib'
+        repo = 'RPTools'
+        name = 'rplib'
+
+        // The rest of these are supposed to establish the contents of
+        // the various fields at the bintray site, but so far they
+        // haven't seemed to propagate.  Will figure out why at some
+        // point (but I have hand-edited the 1419 details).
+        desc = 'General library of RP-appropriate functionality'
+        licenses = ['GPL-2.0']
+        websiteUrl = 'http://github.com/RPTools/rplib'
+        issueTrackerUrl = 'http://github.com/RPTools/rplib/issues'
+        vcsUrl = 'https://github.com/RPTools/rplib.git'
+        //labels = ['blah', 'yada', 'meh']
+        publicDownloadNumbers = true
+        githubRepo = 'RPTools/rplib'
+        githubReleaseNotesFile = 'README.md'
+        version {
+            name = getVersionName()
+            // It would be nice if 'desc' could contain "dev" when the
+            // third field is an odd number and "stable" when the third
+            // field is an even number...
+            desc = "Description of " + getVersionName()
+            released = new Date()
+            vcsTag = name
+            gpg {
+                sign = true
+                passphrase = 'my_passphrase'
+            }
+            mavenCentralSync {
+                sync = false
+                user = 'rptools'
+                password = 'password'
+                close = '1'
+            }
+        }
+    }
+}
 
 /*
- * Gets the version name from the latest Git tag
- */
-
+* Gets the version name from project properties or 'version.txt'
+*/
 def getVersionName() {
-
     if (project.hasProperty('buildVersion')) {
         return buildVersion
     } else {
         String vtxtVersionNo = new File('build-resources/version.txt').text.trim()
-
         return vtxtVersionNo
     }
 }
@@ -127,16 +236,36 @@ pmd {
     sourceSets = []  // Empty source set so it wont run during tebuild/check
 }
 
-
-
-task showBuildVersion() << {
-    println 'Build Version Number = ' + project.version
+task showBuildVersion() {
+    doLast {
+        println 'Build Version Number = ' + project.version
+    }
 }
 
 jar {
     manifest {
-        attributes 'Implementation-Title': 'rplib',
-                   'Implementation-Version': project.version
+        attributes  'Implementation-Title': 'rplib',
+                    'Implementation-Version': project.version,
+                    'Built-By': System.getProperty('user.name'),
+                    'Built-Date': new Date(),
+                    'Built-JDK': System.getProperty('java.version'),
+                    'Source-Compatibility': project.sourceCompatibility,
+                    'Target-Compatibility': project.targetCompatibility
     }
 }
 
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}

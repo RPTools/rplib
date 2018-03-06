@@ -406,6 +406,10 @@ public class PackedFile {
 		putFile(CONTENT_FILE, content);
 	}
 
+	public void setContent(Object content, Class omittedClass, String omittedField) throws IOException {
+		putFileWithOmissions(CONTENT_FILE, content, omittedClass, omittedField);
+	}
+
 	/**
 	 * Does the work of preparing for output to a temporary file, returning the {@link File} object associated with the
 	 * temporary location. The caller is then expected to open and write their data to the file which will later be
@@ -483,7 +487,23 @@ public class PackedFile {
 		FileOutputStream fos = new FileOutputStream(explodedFile);
 		OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
 		BufferedWriter bw = new BufferedWriter(osw);
+
 		xstream.toXML(obj, bw);
+
+		bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
+		IOUtils.closeQuietly(bw);
+	}
+
+	// This method can remove a Class.field for backwards compatibility, i.e. LightSource.lumens for b89 compatibility
+	public void putFileWithOmissions(String path, Object obj, Class omittedClass, String omittedField) throws IOException {
+		File explodedFile = putFileImpl(path);
+		FileOutputStream fos = new FileOutputStream(explodedFile);
+		OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+		BufferedWriter bw = new BufferedWriter(osw);
+
+		xstream.omitField(omittedClass, omittedField);
+		xstream.toXML(obj, bw);
+
 		bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
 		IOUtils.closeQuietly(bw);
 	}
