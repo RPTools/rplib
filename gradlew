@@ -163,7 +163,7 @@ APP_ARGS=$(save "$@")
 
 # Collect all arguments for the java command, following the shell quoting and substitution rules
 version=$("$JAVACMD" -version 2>&1 | sed -e '1{;s/^[^"]*"//;s/[.].*$//;q;}')
-if [ "$version" -ge 9 ]; then
+if [ "X$version" != "X" ] && [ "$version" -ge 9 ]; then
     JAVA9="--illegal-access=permit"
 else
     JAVA9=""
