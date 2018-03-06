@@ -159,13 +159,13 @@ publishing {
 bintray {
     user = System.getProperty('bintray.user')
     key = System.getProperty('bintray.key')
+    String publishProperty = System.getProperty('publish')
     publications = ['bintrayPublication']
 
     //Whether to run this as dry-run, without deploying
     dryRun = false
 
     //Whether version should be auto published after an upload
-    String publishProperty = System.getProperty('publish')
     publish = (publishProperty == "true")
     println "Publishing uploaded files:  " + publish
 

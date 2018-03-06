@@ -3,7 +3,7 @@
 # Or maybe the upload should always happen, but the publishing
 # is a separate task?
 language: java
-script: gradle build
+script: gradle build -Dpublish=true "-Duser=$BINTRAY_USER" "-Dkey=$BINTRAY_KEY"
 jdk:
 - oraclejdk8
 notifications:
