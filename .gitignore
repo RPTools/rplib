@@ -1,7 +1,5 @@
 .gradle
 build/
-bin/
-maven-repo/
 
 # OS generated files
 ################################################################################
@@ -20,7 +18,6 @@ Thumbs.db
 *.log
 *~
 target/
-build/
 out/
 
 
