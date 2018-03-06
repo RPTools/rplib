@@ -162,7 +162,13 @@ save () {
 APP_ARGS=$(save "$@")
 
 # Collect all arguments for the java command, following the shell quoting and substitution rules
-eval set -- $DEFAULT_JVM_OPTS $JAVA_OPTS --illegal-access=permit $GRADLE_OPTS "\"-Dorg.gradle.appname=$APP_BASE_NAME\"" -classpath "\"$CLASSPATH\"" org.gradle.wrapper.GradleWrapperMain "$APP_ARGS"
+version=$("$JAVACMD" -version 2>&1 | sed -e '1{;s/^[^"]*"//;s/[.].*$//;q;}')
+if [ "$version" -ge 9 ]; then
+    JAVA9="--illegal-access=permit"
+else
+    JAVA9=""
+fi
+eval set -- $DEFAULT_JVM_OPTS $JAVA_OPTS $JAVA9 $GRADLE_OPTS "\"-Dorg.gradle.appname=$APP_BASE_NAME\"" -classpath "\"$CLASSPATH\"" org.gradle.wrapper.GradleWrapperMain "$APP_ARGS"
 
 # by default we should be in the correct project dir, but when run from Finder on Mac, the cwd is wrong
 if [ "$(uname)" = "Darwin" ] && [ "$HOME" = "$PWD" ]; then

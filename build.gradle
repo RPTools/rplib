@@ -165,7 +165,9 @@ bintray {
     dryRun = false
 
     //Whether version should be auto published after an upload
-    publish = true
+    String publishProperty = System.getProperty('publish')
+    publish = (publishProperty == "true")
+    print "Publishing uploaded files:  " + publish
 
     //Whether to override version artifacts already published
     override = true
