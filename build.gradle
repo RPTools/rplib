@@ -191,11 +191,14 @@ bintray {
         githubRepo = 'RPTools/rplib'
         githubReleaseNotesFile = 'README.md'
         version {
-            name = getVersionName()
+            name = System.getProperty('tag')
+            if (name == '' || name == null) {
+                name = getVersionName()
+            }
             // It would be nice if 'desc' could contain "dev" when the
             // third field is an odd number and "stable" when the third
             // field is an even number...
-            desc = "Description of " + getVersionName()
+            desc = "Description of " + name
             released = new Date()
             vcsTag = name
             gpg {
@@ -234,12 +237,6 @@ findbugs {
 pmd {
     ignoreFailures = true
     sourceSets = []  // Empty source set so it wont run during tebuild/check
-}
-
-task showBuildVersion() {
-    doLast {
-        println 'Build Version Number = ' + project.version
-    }
 }
 
 jar {
