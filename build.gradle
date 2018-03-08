@@ -29,15 +29,13 @@ plugins {
     id 'eclipse'
 }
 
-configurations { ftpAntTask }
+ext.gitrepo = Grgit.open(project.file('.'))
+ext.compileDate = new Date();
+ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
-dependencies {
-    ftpAntTask("org.apache.ant:ant-commons-net:1.9.4") {
-        module("commons-net:commons-net:1.4.1") {
-            dependencies "oro:oro:2.0.8:jar"
-        }
-    }
-}
+String reponame = 'RPTools'
+String repourl = 'github.com/'+reponame+'/'+project.name
+String userOrganization = 'rptools'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -45,8 +43,6 @@ targetCompatibility = 1.8
 if (version == 'unspecified') {
     version = getVersionName()
 }
-
-ext.repo = Grgit.open(project.file('.'))
 
 spotless {
     java {
@@ -102,9 +98,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     deployerJars 'org.apache.maven.wagon:wagon-ssh:2.2'
 }
-
-ext.compileDate = new Date();
-ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
 repositories {
     mavenLocal()
@@ -167,28 +160,33 @@ bintray {
 
     //Whether version should be auto published after an upload
     publish = (publishProperty == "true")
-    println "Publishing uploaded files:  " + getVersionName()
+    if (publish) {
+        println "Publishing uploaded files:  " + getVersionName()
+    } else {
+        println "Not publishing uploaded files:  " + getVersionName()
+    }
 
     //Whether to override version artifacts already published
     override = true
 
     pkg {
-        userOrg = 'rptools' // result is '.../rptools/RPTools/rplib'
-        repo = 'RPTools'
-        name = 'rplib'
+        // result is 'rptools/RPTools/rplib'
+        userOrg = userOrganization
+        repo = reponame
+        name = project.name
 
         // The rest of these are supposed to establish the contents of
         // the various fields at the bintray site, but so far they
         // haven't seemed to propagate.  Will figure out why at some
         // point (but I have hand-edited the 1419 details).
         desc = 'General library of RP-appropriate functionality'
-        licenses = ['GPL-2.0']
-        websiteUrl = 'http://github.com/RPTools/rplib'
-        issueTrackerUrl = 'http://github.com/RPTools/rplib/issues'
-        vcsUrl = 'https://github.com/RPTools/rplib.git'
+        licenses = ['LGPL-3.0']
+        websiteUrl = 'http://'+repourl
+        issueTrackerUrl = 'http://'+repourl+'/issues'
+        vcsUrl = 'https://'+repourl+'.git'
         //labels = ['blah', 'yada', 'meh']
         publicDownloadNumbers = true
-        githubRepo = 'RPTools/rplib'
+        githubRepo = reponame+'/'+userOrg
         githubReleaseNotesFile = 'README.md'
         version {
             name = System.getProperty('tag')
@@ -241,7 +239,7 @@ pmd {
 
 jar {
     manifest {
-        attributes  'Implementation-Title': 'rplib',
+        attributes  'Implementation-Title': project.name,
                     'Implementation-Version': project.version,
                     'Built-By': System.getProperty('user.name'),
                     'Built-Date': new Date(),
@@ -249,6 +247,7 @@ jar {
                     'Source-Compatibility': project.sourceCompatibility,
                     'Target-Compatibility': project.targetCompatibility
     }
+    include "packages/license/COPYING.LGPLv3"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -265,4 +264,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+task deploy() {
+    println "Nothing for Gradle to do when deploying libraries."
+    println "Travis will move the JARs into 'releases' in GitHub."
 }
