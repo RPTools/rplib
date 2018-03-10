@@ -16,6 +16,9 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
 
+# This will cause a deploy back to GitHub for any tagged commit.  Note
+# that tagging from the command line seems to require the "-a" option
+# when tagging in order to trigger Travis to deploy.
 before_deploy:
   - ls -l build/libs/
 deploy:
@@ -27,5 +30,4 @@ deploy:
   skip_cleanup: true
   draft: true
   on:
-    repo: Azhrei/rplib
     tags: true
