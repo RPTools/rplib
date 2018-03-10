@@ -18,7 +18,6 @@ cache:
 
 before_deploy:
   - ./gradlew deploy
-  - echo "Tag: $TRAVIS_TAG, Commit: $TRAVIS_COMMIT"
   - ls -l build/libs/
 deploy:
   provider: releases
