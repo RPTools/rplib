@@ -25,14 +25,9 @@ deploy:
   api_key:
     secure: $DEPLOYMENT_KEY
   file_glob: true
-# file: releases/release-*/bundles/*
   file: build/libs/*.jar
-  overwrite: true
   skip_cleanup: true
-  target_commitish: $TRAVIS_COMMIT
-  tag_name: $TRAVIS_TAG
   draft: true
   on:
     repo: Azhrei/rplib
     tags: true
-    all_branches: true
