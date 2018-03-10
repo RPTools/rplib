@@ -23,6 +23,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
+    # DEPLOYMENT_KEY must be set in the Travis configuration
     secure: $DEPLOYMENT_KEY
   file_glob: true
   file: build/libs/*.jar
