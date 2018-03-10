@@ -21,7 +21,7 @@ plugins {
     id "com.jfrog.bintray" version "1.7.3"
     id "maven-publish"
     id "java-library"   // Solution for gradle issue#1118
-    id 'java'
+    id "java"
     id 'findbugs'
     id 'pmd'
     id 'maven'
@@ -38,7 +38,6 @@ String repourl = 'github.com/'+reponame+'/'+project.name
 String userOrganization = 'rptools'
 
 sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 if (version == 'unspecified') {
     version = getVersionName()
@@ -48,7 +47,6 @@ spotless {
     java {
         eclipseFormatFile 'build-resources/eclipse.prefs.formatter.xml'
     }
-
     format 'misc', {
         target '**/*.gradle', '**/*.md', '**/.gitignore'
 
@@ -58,31 +56,9 @@ spotless {
     }
 }
 
-configurations {
-    deployerJars
-}
-
 task wrapper(type: Wrapper) {
     gradleVersion = '4.5.1'
 }
-
-//install {
-//    repositories.mavenInstaller {
-//        pom.version = project.version;
-//        pom.artifactId = 'rplib';
-//        pom.groupId = 'net.rptools.rplib';
-//    }
-//}
-//
-//uploadArchives {
-//    repositories.mavenDeployer {
-//        pom.version = project.version;
-//        pom.artifactId = 'rplib';
-//        pom.groupId = 'net.rptools.rplib';
-//        configuration = configurations.deployerJars;
-//        repository url: 'file://' + projectDir + '/../maven-repo'
-//    }
-//}
 
 dependencies {
     compile 'antlr:antlr:2.7.6'
@@ -95,8 +71,7 @@ dependencies {
     compile 'com.withay:withay-util:1.0'
     compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
     compile 'net.java.abeille:abeille-formsrt:2.0'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    deployerJars 'org.apache.maven.wagon:wagon-ssh:2.2'
+    testCompile 'junit:junit:4.11'
 }
 
 repositories {
@@ -123,9 +98,8 @@ def pomConfig = {
             email "support@rptools.net"
         }
     }
-
     scm {
-        url "https://github.com/RPTools/rplib"
+        url "https://"+repourl
     }
 }
 
@@ -135,14 +109,14 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            artifactId = 'rplib'
-            version    = getVersionName()
+            artifactId = project.name
+            version    = project.version
             groupId    = 'net.rptools.rplib';
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'RPTools general lib')
                 root.appendNode('name', 'RP Lib')
-                root.appendNode('url', 'https://github.com/RPTools/rplib')
+                root.appendNode('url', "https://"+repourl)
                 root.children().last() + pomConfig
             }
         }
@@ -244,10 +218,14 @@ jar {
                     'Built-By': System.getProperty('user.name'),
                     'Built-Date': new Date(),
                     'Built-JDK': System.getProperty('java.version'),
-                    'Source-Compatibility': project.sourceCompatibility,
-                    'Target-Compatibility': project.targetCompatibility
+                    'Source-Compatibility': project.sourceCompatibility
     }
-    include "packages/license/COPYING.LGPLv3"
+    /*
+    include("packages/license/COPYING.LGPLv3")
+    // Have to include this next line, because all includes are turned
+    // off if even one is specified (such as the license file).
+    include("**"+"/*.class")    // To work around nested comments!
+    */
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -266,7 +244,9 @@ artifacts {
     archives javadocJar
 }
 
-task deploy() {
+/*
+task dont_deploy() {
     println "Nothing for Gradle to do when deploying libraries."
     println "Travis will move the JARs into 'releases' in GitHub."
 }
+*/

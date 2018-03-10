@@ -10,8 +10,15 @@
 # Not needed at the current time, though, since the RPTools
 # libraries can be built using JDK8.
 
-if [ "X$TRAVIS_TAG" = "X" ]; then
-    gradle build
+set -ev
+
+if [ "X$TRAVIS_TAG" = "X" ] || [ "X$TRAVIS_REPO_SLUG" != "RPTools/rplib" ]; then
+    echo "Building; no bintray upload."
+    ./gradlew --no-daemon build
 else
-    gradle bintrayUpload "-Dtag=$TRAVIS_TAG" -Dpublish=true "-Duser=$BINTRAY_USER" "-Dkey=$BINTRAY_KEY"
+    echo "Building; will upload to bintray when finished."
+    ./gradlew --no-daemon bintrayUpload \
+        "-Dtag=$TRAVIS_TAG" \
+        "-Dpublish=true" \
+        "-Duser=$BINTRAY_USER" "-Dkey=$BINTRAY_KEY"
 fi
