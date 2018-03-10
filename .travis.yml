@@ -3,11 +3,30 @@
 # Or maybe the upload should always happen, but the publishing
 # is a separate task?
 language: java
-# For JDK9, add
-#   _JAVA_OPTIONS="${JAVA_OPTIONS} --illegal-access=permit"
-script: gradle bintrayUpload -Dpublish=true "-Duser=$BINTRAY_USER" "-Dkey=$BINTRAY_KEY"
+script: ./.travis/builder.sh
 jdk:
 - oraclejdk8
-notifications:
-  slack:
-    secure: Issnni/GrSCwmvwAC/JRdLAZe3863ahnY46muQnt2yhgmcT9ygWsjkyCewwPtkfb0sFT+PRmymeOrMwFJk/4DaCr8F0kFY6bbSICWzy5ovrbJypCqsrS6am0GTxWvGkwcYyihh94HW6mIR+siiJF0s0S6J4nzWqW0h8T7p3iZNY38FlZImaAH4xXI9t3kJ1uuZ4QvI7d738rwaGHDRy1uhCF465oWDgaRujM4R6PZPf/lJE8JQRquULjYdHwdzIy/57zNX8/knrpbMpN3mpBjMdoM7RQKkW22eQfwGwVzx/1NZBPcOn2BAYL5rMVpRPQOnqf2dO8uzP+z5MbtQ7j588BfRuvQ3AVYlJgLIrltMmb6S+XQmHG9wiQ9efhH7/1Nbv+MchHujUGym/cVIbrWhWKJbfVg7zP9QiMDQdP24rVE2OjL6Fg1YI/81faFlOPKRx0JwLCAnfmwxudc7H6vb4jaWmrPWYbA5n67ZPEAb7RkFTG1ZQu6XBioIsvz8HjiRegL3hPpHSScEyK6TZCkcFIawPIauM6en5uD+nfZ7RI7AtG8IK8dSyJoV+PxNMRQHqwQHSUQSa4xd2uJlNSKej9pQwmtTL4qVsW4UqPt/wyZMRIBweOedwFvCkG5rupEGo7WouiVymnLH2BUlLuI3TpJDL9oeH1EZKlFYltzlY=
+
+# Shamelessly copied from Jamz's TokenTool configuration file. :)
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+
+before_deploy:
+  - ls -l build/libs/
+deploy:
+  provider: releases
+  api_key:
+    # DEPLOYMENT_KEY must be set in the Travis configuration
+    secure: $DEPLOYMENT_KEY
+  file_glob: true
+  file: build/libs/*.jar
+  skip_cleanup: true
+  draft: true
+  on:
+    repo: Azhrei/rplib
+    tags: true

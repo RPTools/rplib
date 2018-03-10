@@ -21,7 +21,7 @@ plugins {
     id "com.jfrog.bintray" version "1.7.3"
     id "maven-publish"
     id "java-library"   // Solution for gradle issue#1118
-    id 'java'
+    id "java"
     id 'findbugs'
     id 'pmd'
     id 'maven'
@@ -29,30 +29,24 @@ plugins {
     id 'eclipse'
 }
 
-configurations { ftpAntTask }
+ext.gitrepo = Grgit.open(project.file('.'))
+ext.compileDate = new Date();
+ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
-dependencies {
-    ftpAntTask("org.apache.ant:ant-commons-net:1.9.4") {
-        module("commons-net:commons-net:1.4.1") {
-            dependencies "oro:oro:2.0.8:jar"
-        }
-    }
-}
+String reponame = 'RPTools'
+String repourl = 'github.com/'+reponame+'/'+project.name
+String userOrganization = 'rptools'
 
 sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 if (version == 'unspecified') {
     version = getVersionName()
 }
 
-ext.repo = Grgit.open(project.file('.'))
-
 spotless {
     java {
         eclipseFormatFile 'build-resources/eclipse.prefs.formatter.xml'
     }
-
     format 'misc', {
         target '**/*.gradle', '**/*.md', '**/.gitignore'
 
@@ -62,31 +56,9 @@ spotless {
     }
 }
 
-configurations {
-    deployerJars
-}
-
 task wrapper(type: Wrapper) {
     gradleVersion = '4.5.1'
 }
-
-//install {
-//    repositories.mavenInstaller {
-//        pom.version = project.version;
-//        pom.artifactId = 'rplib';
-//        pom.groupId = 'net.rptools.rplib';
-//    }
-//}
-//
-//uploadArchives {
-//    repositories.mavenDeployer {
-//        pom.version = project.version;
-//        pom.artifactId = 'rplib';
-//        pom.groupId = 'net.rptools.rplib';
-//        configuration = configurations.deployerJars;
-//        repository url: 'file://' + projectDir + '/../maven-repo'
-//    }
-//}
 
 dependencies {
     compile 'antlr:antlr:2.7.6'
@@ -99,12 +71,8 @@ dependencies {
     compile 'com.withay:withay-util:1.0'
     compile 'de.huxhorn.sulky:de.huxhorn.sulky.3rdparty.jlayer:1.0'
     compile 'net.java.abeille:abeille-formsrt:2.0'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    deployerJars 'org.apache.maven.wagon:wagon-ssh:2.2'
+    testCompile 'junit:junit:4.11'
 }
-
-ext.compileDate = new Date();
-ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
 repositories {
     mavenLocal()
@@ -130,9 +98,8 @@ def pomConfig = {
             email "support@rptools.net"
         }
     }
-
     scm {
-        url "https://github.com/RPTools/rplib"
+        url "https://"+repourl
     }
 }
 
@@ -142,14 +109,14 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            artifactId = 'rplib'
-            version    = getVersionName()
+            artifactId = project.name
+            version    = project.version
             groupId    = 'net.rptools.rplib';
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'RPTools general lib')
                 root.appendNode('name', 'RP Lib')
-                root.appendNode('url', 'https://github.com/RPTools/rplib')
+                root.appendNode('url', "https://"+repourl)
                 root.children().last() + pomConfig
             }
         }
@@ -167,35 +134,43 @@ bintray {
 
     //Whether version should be auto published after an upload
     publish = (publishProperty == "true")
-    println "Publishing uploaded files:  " + getVersionName()
+    if (publish) {
+        println "Publishing uploaded files:  " + getVersionName()
+    } else {
+        println "Not publishing uploaded files:  " + getVersionName()
+    }
 
     //Whether to override version artifacts already published
     override = true
 
     pkg {
-        userOrg = 'rptools' // result is '.../rptools/RPTools/rplib'
-        repo = 'RPTools'
-        name = 'rplib'
+        // result is 'rptools/RPTools/rplib'
+        userOrg = userOrganization
+        repo = reponame
+        name = project.name
 
         // The rest of these are supposed to establish the contents of
         // the various fields at the bintray site, but so far they
         // haven't seemed to propagate.  Will figure out why at some
         // point (but I have hand-edited the 1419 details).
         desc = 'General library of RP-appropriate functionality'
-        licenses = ['GPL-2.0']
-        websiteUrl = 'http://github.com/RPTools/rplib'
-        issueTrackerUrl = 'http://github.com/RPTools/rplib/issues'
-        vcsUrl = 'https://github.com/RPTools/rplib.git'
+        licenses = ['LGPL-3.0']
+        websiteUrl = 'http://'+repourl
+        issueTrackerUrl = 'http://'+repourl+'/issues'
+        vcsUrl = 'https://'+repourl+'.git'
         //labels = ['blah', 'yada', 'meh']
         publicDownloadNumbers = true
-        githubRepo = 'RPTools/rplib'
+        githubRepo = reponame+'/'+userOrg
         githubReleaseNotesFile = 'README.md'
         version {
-            name = getVersionName()
+            name = System.getProperty('tag')
+            if (name == '' || name == null) {
+                name = getVersionName()
+            }
             // It would be nice if 'desc' could contain "dev" when the
             // third field is an odd number and "stable" when the third
             // field is an even number...
-            desc = "Description of " + getVersionName()
+            desc = "Description of " + name
             released = new Date()
             vcsTag = name
             gpg {
@@ -236,22 +211,21 @@ pmd {
     sourceSets = []  // Empty source set so it wont run during tebuild/check
 }
 
-task showBuildVersion() {
-    doLast {
-        println 'Build Version Number = ' + project.version
-    }
-}
-
 jar {
     manifest {
-        attributes  'Implementation-Title': 'rplib',
+        attributes  'Implementation-Title': project.name,
                     'Implementation-Version': project.version,
                     'Built-By': System.getProperty('user.name'),
                     'Built-Date': new Date(),
                     'Built-JDK': System.getProperty('java.version'),
-                    'Source-Compatibility': project.sourceCompatibility,
-                    'Target-Compatibility': project.targetCompatibility
+                    'Source-Compatibility': project.sourceCompatibility
     }
+    /*
+    include("packages/license/COPYING.LGPLv3")
+    // Have to include this next line, because all includes are turned
+    // off if even one is specified (such as the license file).
+    include("**"+"/*.class")    // To work around nested comments!
+    */
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -269,3 +243,10 @@ artifacts {
     archives sourcesJar
     archives javadocJar
 }
+
+/*
+task dont_deploy() {
+    println "Nothing for Gradle to do when deploying libraries."
+    println "Travis will move the JARs into 'releases' in GitHub."
+}
+*/
