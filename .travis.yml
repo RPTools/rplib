@@ -44,7 +44,7 @@ deploy:
 deploy:
   provider: bintray
   file: package/bintray.deploy.json
-  user: Azhrei
+  user: azhrei
   key:
     secure: "uV/csKpD+Fx+FH8Yh10WA3ANJsXkoIrbtePOUfLtmC+GMvA2RPmlly5kFcGwtbt8nNxDYfknjkUfa3CbZD3ckuwaz2h9zRprVrxOs5cI+8I5mfjdqNQqUZSTYgKi7ic833XLGtIEMwlcH9hN7tdeZUjGUT+xRkErY7ARrcUXlLJDdDQhsB9vwiLvGMEdeLdX9u8toHq5mQWZT9hkWx+cFFAIbmvNopNcvqegmy80q0hl8DKwJwlphs3Y2dgPsTl+ld4utj6KNNMuKCeVD3owMqQkkTeT+pcEqQozmXmKb3y7eowQ8QAX95iwq6qVjJ+Hk8sb3z3dwKe/reQnSa5a/2GQSufgbYMKEufY1ggvrbifntUoDiw9Tz3i9X9FoYJfF1JIZifFvHQoxAuOo5AG+nIm6SRAHcV7hzLlftWOSn6w817P5m/U16rXrCz0BRww7nTVK1ufqD4dhLJjU0ygPfqu0fIadZ4Ggb9eKNAOZY5q69Ts7S9ESzria1HWk+iE1KGD0Sf2RFXG9cQN35gjxQ2SPrBAFR2tuvvmyUJVFwOY/gx0DzDEdRh4L0x75y6lTn/b5j/umlm20WV34DfgeJliR+wEsyPdWbUnFHFm2847YHMi4/lxZZTThOldwEHn1Gg1EScN3GdXjMMLkh02/A5e8vNHOGIC6dclW50gNfw="
 # Add 'passphrase: ...' if a GPG-signed key is used (primarily
