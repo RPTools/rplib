@@ -1,11 +1,13 @@
-# Still needs tweaks so that a 'release' commit causes Gradle to
-# execute the 'bintrayUpload' task instead of the 'build' task.
-# Or maybe the upload should always happen, but the publishing
-# is a separate task?
+# The .travis/builder.sh script now takes into account whether this is a
+# tagged commit and whether it's part of the RPTools repository.  If the
+# answer is yes to both, then "./gradlew bintrayUpload" is executed.
+# Otherwise, it's just a regular "./gradlew build".
+#
+# Eventually, we'll have Travis do this as a deploy target:
+#   https://docs.travis-ci.com/user/deployment/bintray/
 language: java
 script: ./.travis/builder.sh
-jdk:
-- oraclejdk8
+jdk: oraclejdk8
 
 # Shamelessly copied from Jamz's TokenTool configuration file. :)
 before_cache:
@@ -25,9 +27,16 @@ deploy:
   provider: releases
   api_key:
     secure: ZwgxkBc3Q+U8j6V02Z5lco0nR4QB8C+ucWL8z9lwiX8/i0JcoKiKcaoGMujQD+xCjy4dYScQGoyQo3mZgecjPbciC28SjQ0qHenhB1NXQ/NatmzK7pBAZOskB6YGHunvz3/8tkyXrhUZNCcLgz0sNZsROYNp5JKbEQ6PRCqdoJrgwIsy+0luq8daByBqTdd+Pakh/BX1TLyhfqxXiWMsSAi5GcRZATCTLW8Q2G/R6rfKf77A4Yl6Z8qac6r8EkuLoBBMp5GleQZiULRcl9zpvzyrZH0hnua+wLaMGimx1jucUS9bxvk7Dcrk2YRbPUSAi2NpytnS0ek7noa6vOIvJtPPH4aNObvtvLq+scl8rpHBREOBZ9y3JoCWnu9ZKePRVoJqpo1es88hbw4pSOX1TJblgvTKL+QlNnmnQ4cGDn/K8zb2rN/EKp1fygoG/WiLSHOx8/mC79PLw/F6M9ecnZv/gWF7fiY8Y1v2PmwZRPxpyhV4pmEBkEYP3FSmGznPdylkopktn8L4Uk5GT2BuMqdiFILWAVGlmeRPwCip5lazx3kaj1jMcIVJoKCYcBzdfR8nte5VQp+oXBewFPqkHWx8Iu0ZmC9l/2kqsD5bENnhruSNLGI8EVEzV5LqKfsp+bdD1uFJc7jNu9nlfQBbEMFfGCb82757zmxjGp3uhNg=
+
+  # Must prevent 'git stash --all' that Travis does -- we want the JARs
+  # to still be in place!
+  skip_cleanup: true
+
   file_glob: true
   file: build/libs/*.jar
-  skip_cleanup: true
+
+  # The 'draft' tag prevents the release from being public unless/until
+  # the release is edited at github.com and the state changed.
   draft: true
   on:
     tags: true
