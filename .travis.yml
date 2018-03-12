@@ -21,8 +21,6 @@ cache:
 # This will cause a deploy back to GitHub for any tagged commit.  Note
 # that tagging from the command line seems to require the "-a" option
 # when tagging in order to trigger Travis to deploy.
-before_deploy:
-  - ls -l build/libs/
 deploy:
   provider: releases
   api_key: $DEPLOYMENT_KEY
@@ -37,5 +35,17 @@ deploy:
   # The 'draft' tag prevents the release from being public unless/until
   # the release is edited at github.com and the state changed.
   draft: true
+  on:
+    tags: true
+
+# And this will deploy to bintray.  This is only for libraries, of course.
+deploy:
+  provider: bintray
+  file: package/bintray.deploy.json
+  user: $BINTRAY_USER
+  key: $BINTRAY_KEY
+  dry-run: true
+# Add 'passphrase: ...' if a GPG-signed key is used (primarily
+# for when bintray artifacts are published to JCenter or Maven).
   on:
     tags: true

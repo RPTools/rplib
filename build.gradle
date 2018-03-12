@@ -41,15 +41,32 @@ ext.gitrepo = Grgit.open(project.file('.'))
 ext.compileDate = new Date();
 ext.yyyymmdd = (new SimpleDateFormat('yyyyMMDD')).format(ext.compileDate);
 
-String reponame = 'RPTools'
-String repourl = 'github.com/'+reponame+'/'+project.name
-String userOrganization = 'rptools'
-String description = 'General library of role-playing appropriate functionality'
-String libName = 'RP lib'
-
 sourceCompatibility = 1.8
-
 version = getVersionName()
+
+task createBintrayDeploymentDescription(type: Copy) {
+    from 'package'
+    into 'package'
+    include 'template.deploy.json'
+    rename { String filename -> filename.replace('template', 'bintray') }
+
+    // Use some of the filters provided by Ant
+    filter(ReplaceTokens, tokens: [
+        NAME:           project.name,
+        DESCRIPTION:    'General library of role-playing functionality',
+        LICENSE:        "LGPL-3.0", // All libs are LGPLv3
+        VERSION:        version
+    ])
+    // Use a closure to remove comment lines
+    // (we're not currently using any, but...)
+    filter { String line -> line.startsWith('#') ? null : line }
+    filteringCharset = 'UTF-8'
+}
+
+// When building the JAR, make sure the deployment descriptor for
+// bintray is also created.  While this runs the descriptor creation
+// before the JAR is actually built, the order doesn't really matter.
+jar.dependsOn(createBintrayDeploymentDescription)
 
 spotless {
     java {
@@ -94,109 +111,6 @@ repositories {
     }
 }
 
-def pomConfig = {
-    licenses {
-        license {
-            name "The Lesser General Public License, v3.0"
-            url "http://www.gnu.org/licenses/"
-            distribution "repo"
-        }
-    }
-    developers {
-        developer {
-            id userOrganization     // 'rptools'
-            name userOrganization   // 'rptools'
-            email "support@rptools.net"
-        }
-    }
-    scm {
-        url "https://"+repourl
-    }
-}
-
-publishing {
-    publications {
-        bintrayPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-            artifactId = project.name
-            version    = project.version
-            groupId    = 'net.rptools.'+project.name;
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', description)
-                root.appendNode('name', libName)
-                root.appendNode('url', "https://"+repourl)
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
-
-bintray {
-    user = System.getProperty('bintray.user')
-    key = System.getProperty('bintray.key')
-    String publishProperty = System.getProperty('publish')
-    publications = ['bintrayPublication']
-
-    // Whether to run this as dry-run, without deploying
-    dryRun = false
-
-    // Whether version should be auto published after an upload
-    publish = (publishProperty == "true")
-    if (publish) {
-        println "Publishing uploaded files for " + getVersionName()
-    } else {
-        println "Not publishing uploaded files for " + getVersionName()
-    }
-
-    // Whether to override version artifacts already published
-    override = true
-
-    pkg {
-        // result is 'rptools/RPTools/rplib'
-        userOrg = userOrganization
-        repo = reponame
-        name = project.name
-
-        // The rest of these are supposed to establish the contents of
-        // the various fields at the bintray site, but so far they
-        // haven't seemed to propagate.  Will figure out why at some
-        // point (but I have hand-edited the 1419 details).
-        desc = description
-        licenses = ['LGPL-3.0']
-        websiteUrl = 'http://'+repourl
-        issueTrackerUrl = 'http://'+repourl+'/issues'
-        vcsUrl = 'https://'+repourl+'.git'
-        //labels = ['blah', 'yada', 'meh']
-        publicDownloadNumbers = true
-        githubRepo = reponame+'/'+userOrg
-        githubReleaseNotesFile = 'README.md'
-        version {
-            name = getVersionName()
-            // It would be nice if 'desc' could contain "dev" when the
-            // third field is an odd number and "stable" when the third
-            // field is an even number...  Too much work right now.
-            desc = "Description of " + name     // Where does this show up?
-            released = new Date()
-            vcsTag = name
-            // At some point, we may want to publish to Maven, but these
-            // are unused for now.
-            gpg {
-                sign = true
-                passphrase = 'my_passphrase'
-            }
-            mavenCentralSync {
-                sync = false
-                user = 'rptools'
-                password = 'password'
-                close = '1'
-            }
-        }
-    }
-}
-
 /*
  * Gets the version name from
  *   1. The command line (allows using $TRAVIS_TAG),
@@ -235,14 +149,9 @@ jar {
                     'Source-Compatibility': project.sourceCompatibility
     }
     /*
-    // If I include this line, I also have to list include() lines for
-    // all files.  That's not just .class files, as it can include
-    // images and XML files as well.  Maybe the include could just grab
-    // _everything_, since the build directory should only contain what
-    // goes into the JAR, but I don't want to rely on that until there's
-    // been more testing.  Remember: we want this build file to work for
-    // all RPTools libraries in the future...
-    include("packages/license/COPYING.LGPLv3")
+    include("**")
+    // This next line doesn't work.  figure it out later...
+    include("../../packages/license/COPYING.LGPLv3")
     */
 }
 
