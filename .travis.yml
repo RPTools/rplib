@@ -44,7 +44,7 @@ deploy:
   file: package/bintray.deploy.json
   user: $BINTRAY_USER
   key: $BINTRAY_KEY
-  dry-run: true
+# dry-run: true
 # Add 'passphrase: ...' if a GPG-signed key is used (primarily
 # for when bintray artifacts are published to JCenter or Maven).
   on:
