@@ -41,6 +41,10 @@ deploy:
 # And this will deploy to bintray.  This is only for libraries, of course.
 # The deployment descriptor, bintray.deploy.json, is created by Gradle
 # when it builds the JAR.
+before_deploy:
+  - which dpl
+  - rvm $(travis_internal_ruby) --fuzzy do ruby -S gem install -v 1.8.30 dpl
+  - which dpl
 deploy:
   provider: bintray
   file: package/bintray.deploy.json
@@ -50,3 +54,6 @@ deploy:
 # for when bintray artifacts are published to JCenter or Maven).
   on:
     tags: true
+# edge:
+#   source: travis-ci/dpl
+#   branch: release-debug
