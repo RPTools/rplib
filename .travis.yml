@@ -42,9 +42,7 @@ deploy:
 # The deployment descriptor, bintray.deploy.json, is created by Gradle
 # when it builds the JAR.
 before_deploy:
-  - rvm $(travis_internal_ruby) --fuzzy do ruby -S gem uninstall dpl
   - rvm $(travis_internal_ruby) --fuzzy do ruby -S gem install -v 1.8.30 dpl
-  - bash -c "which dpl"
 deploy:
   provider: bintray
   file: package/bintray.deploy.json
