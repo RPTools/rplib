@@ -20,7 +20,9 @@ cache:
 
 # This will cause a deploy back to GitHub for any tagged commit.  Note
 # that tagging from the command line seems to require the "-a" option
-# when tagging in order to trigger Travis to deploy.
+# when tagging in order to trigger Travis to deploy.  Use the Travis
+# "Settings" for your repo to add the DEPLOYMENT_KEY variable; the value
+# should be GitHub's _personal OAuth token_.
 deploy:
   - provider: releases
     api_key: $DEPLOYMENT_KEY
@@ -40,7 +42,10 @@ deploy:
 
 # And this will deploy to bintray.  This is only for libraries, of course.
 # The deployment descriptor, bintray.deploy.json, is created by Gradle
-# when it builds the JAR.
+# when it builds the JAR.  Create Travis variables via the "Settings"
+# for the repo.  The bintray key can be found by logging into bintray,
+# editing your profile, clicking "API KEY" in the bottom left, then
+# copy/pasting the key.
   - provider: bintray
     skip_cleanup: true
     file: package/bintray.deploy.json
@@ -49,6 +54,8 @@ deploy:
 # Add 'passphrase: ...' if a GPG-signed key is used (primarily
 # for when bintray artifacts are published to JCenter or Maven).
     on:
+      repo: RPTools/rplib
       tags: true
+# (When dpl is fixed, the 'edge' key can be removed.  See travis-ci#9314)
     edge:
       branch: v1.8.47
