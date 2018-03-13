@@ -9,6 +9,12 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 import org.ajoberstar.grgit.*
 
+String reponame = 'RPTools'
+String repourl = 'github.com/'+reponame+'/'+project.name
+String userOrganization = 'rptools'
+String description = 'General library of role-playing appropriate functionality'
+String libName = 'RP lib'
+
 buildscript {
     repositories {
         mavenLocal()
@@ -108,6 +114,109 @@ repositories {
     maven {
         // Currently holds withay-util and abeille-formsrt
         url "http://maptool.craigs-stuff.net/repo/"
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "The Lesser General Public License, v3.0"
+            url "http://www.gnu.org/licenses/"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id userOrganization     // 'rptools'
+            name userOrganization   // 'rptools'
+            email "support@rptools.net"
+        }
+    }
+    scm {
+        url "https://"+repourl
+    }
+}
+
+publishing {
+    publications {
+        bintrayPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            artifactId = project.name
+            version    = project.version
+            groupId    = 'net.rptools.'+project.name;
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', description)
+                root.appendNode('name', libName)
+                root.appendNode('url', "https://"+repourl)
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    String publishProperty = System.getProperty('publish')
+    publications = ['bintrayPublication']
+
+    // Whether to run this as dry-run, without deploying
+    dryRun = false
+
+    // Whether version should be auto published after an upload
+    publish = (publishProperty == "true")
+    if (publish) {
+        println "Publishing uploaded files for " + getVersionName()
+    } else {
+        println "Not publishing uploaded files for " + getVersionName()
+    }
+
+    // Whether to override version artifacts already published
+    override = true
+
+    pkg {
+        // result is 'rptools/RPTools/rplib'
+        userOrg = userOrganization
+        repo = reponame
+        name = project.name
+
+        // The rest of these are supposed to establish the contents of
+        // the various fields at the bintray site, but so far they
+        // haven't seemed to propagate.  Will figure out why at some
+        // point (but I have hand-edited the 1419 details).
+        desc = description
+        licenses = ['LGPL-3.0']
+        websiteUrl = 'http://www.rptools.net/'
+        issueTrackerUrl = 'http://'+repourl+'/issues'
+        vcsUrl = 'https://'+repourl+'.git'
+        //labels = ['blah', 'yada', 'meh']
+        publicDownloadNumbers = true
+        githubRepo = reponame+'/'+userOrg
+        githubReleaseNotesFile = 'README.md'
+        version {
+            name = getVersionName()
+            // It would be nice if 'desc' could contain "dev" when the
+            // third field is an odd number and "stable" when the third
+            // field is an even number...  Too much work right now.
+            desc = "Description of " + name     // Where does this show up?
+            released = new Date()
+            vcsTag = name
+            // At some point, we may want to publish to Maven, but these
+            // are unused for now.
+            gpg {
+                sign = true
+                passphrase = 'my_passphrase'
+            }
+            mavenCentralSync {
+                sync = false
+                user = 'rptools'
+                password = 'password'
+                close = '1'
+            }
+        }
     }
 }
 
