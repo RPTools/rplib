@@ -15,7 +15,7 @@
     },
 
     "version": {
-        "name": "test-deploy",
+        "name": "@VERSION@",
         "desc": "development version",
         "vcs_tag": "@VERSION@",
         "gpgSign": false
