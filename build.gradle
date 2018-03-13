@@ -4,6 +4,8 @@
  * try to use variables for things that will be different from library
  * to library, preferably with a function that can automatically
  * determine the value...
+ *
+ * Search for 'RPTools' to see the variables defined so far.
  */
 import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
@@ -37,11 +39,16 @@ plugins {
     id 'eclipse'
 }
 
+// ================================================================
+// Change these below for each library.  Don't touch anything else!
 String reponame = 'RPTools'
 String repourl = 'github.com/'+reponame+'/'+project.name
 String userOrganization = 'rptools'
-String description = 'General library of role-playing appropriate functionality'
-String libName = 'RP lib'
+String description = 'General library of role-playing functionality'
+
+String libName = 'RP lib'   // only used by bintrayUpload (unused)
+// Change these above for each library.  Don't touch anything else!
+// ================================================================
 
 ext.gitrepo = Grgit.open(project.file('.'))
 ext.compileDate = new Date();
@@ -59,7 +66,7 @@ task createBintrayDeploymentDescription(type: Copy) {
     // Use some of the filters provided by Ant
     filter(ReplaceTokens, tokens: [
         NAME:           project.name,
-        DESCRIPTION:    'General library of role-playing functionality',
+        DESCRIPTION:    description,
         LICENSE:        "LGPL-3.0", // All libs are LGPLv3
         VERSION:        version
     ])
