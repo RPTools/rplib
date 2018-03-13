@@ -6,7 +6,7 @@
 # Eventually, we'll have Travis do this as a deploy target:
 #   https://docs.travis-ci.com/user/deployment/bintray/
 language: java
-script: ./.travis/builder.sh
+script: ./gradlew build
 jdk: oraclejdk8
 
 # Shamelessly copied from Jamz's TokenTool configuration file. :)
