@@ -1,13 +1,61 @@
-# Still needs tweaks so that a 'release' commit causes Gradle to
-# execute the 'bintrayUpload' task instead of the 'build' task.
-# Or maybe the upload should always happen, but the publishing
-# is a separate task?
+# The .travis/builder.sh script now takes into account whether this is a
+# tagged commit and whether it's part of the RPTools repository.  If the
+# answer is yes to both, then "./gradlew bintrayUpload" is executed.
+# Otherwise, it's just a regular "./gradlew build".
+#
+# Eventually, we'll have Travis do this as a deploy target:
+#   https://docs.travis-ci.com/user/deployment/bintray/
 language: java
-# For JDK9, add
-#   _JAVA_OPTIONS="${JAVA_OPTIONS} --illegal-access=permit"
-script: gradle build -Dpublish=true "-Duser=$BINTRAY_USER" "-Dkey=$BINTRAY_KEY"
-jdk:
-- oraclejdk8
-notifications:
-  slack:
-    secure: Issnni/GrSCwmvwAC/JRdLAZe3863ahnY46muQnt2yhgmcT9ygWsjkyCewwPtkfb0sFT+PRmymeOrMwFJk/4DaCr8F0kFY6bbSICWzy5ovrbJypCqsrS6am0GTxWvGkwcYyihh94HW6mIR+siiJF0s0S6J4nzWqW0h8T7p3iZNY38FlZImaAH4xXI9t3kJ1uuZ4QvI7d738rwaGHDRy1uhCF465oWDgaRujM4R6PZPf/lJE8JQRquULjYdHwdzIy/57zNX8/knrpbMpN3mpBjMdoM7RQKkW22eQfwGwVzx/1NZBPcOn2BAYL5rMVpRPQOnqf2dO8uzP+z5MbtQ7j588BfRuvQ3AVYlJgLIrltMmb6S+XQmHG9wiQ9efhH7/1Nbv+MchHujUGym/cVIbrWhWKJbfVg7zP9QiMDQdP24rVE2OjL6Fg1YI/81faFlOPKRx0JwLCAnfmwxudc7H6vb4jaWmrPWYbA5n67ZPEAb7RkFTG1ZQu6XBioIsvz8HjiRegL3hPpHSScEyK6TZCkcFIawPIauM6en5uD+nfZ7RI7AtG8IK8dSyJoV+PxNMRQHqwQHSUQSa4xd2uJlNSKej9pQwmtTL4qVsW4UqPt/wyZMRIBweOedwFvCkG5rupEGo7WouiVymnLH2BUlLuI3TpJDL9oeH1EZKlFYltzlY=
+script: ./gradlew build
+jdk: oraclejdk8
+
+# Shamelessly copied from Jamz's TokenTool configuration file. :)
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+
+# This will cause a deploy back to GitHub for any tagged commit.  Note
+# that tagging from the command line seems to require the "-a" option
+# when tagging in order to trigger Travis to deploy.  Use the Travis
+# "Settings" for your repo to add the DEPLOYMENT_KEY variable; the value
+# should be GitHub's _personal OAuth token_.
+deploy:
+  - provider: releases
+    api_key: $DEPLOYMENT_KEY
+
+    # Must prevent 'git stash --all' that Travis does -- we want the JARs
+    # to still be in place!
+    skip_cleanup: true
+
+    file_glob: true
+    file: build/libs/*.jar
+
+    # The 'draft' tag prevents the release from being public unless/until
+    # the release is edited at github.com and the state changed.
+    draft: true
+    on:
+      tags: true
+
+# And this will deploy to bintray.  This is only for libraries, of course.
+# The deployment descriptor, bintray.deploy.json, is created by Gradle
+# when it builds the JAR.  Create Travis variables via the "Settings"
+# for the repo.  The bintray key can be found by logging into bintray,
+# editing your profile, clicking "API KEY" in the bottom left, then
+# copy/pasting the key.
+  - provider: bintray
+    skip_cleanup: true
+    file: package/bintray.deploy.json
+    user: $BINTRAY_USER
+    key: $BINTRAY_KEY
+# Add 'passphrase: ...' if a GPG-signed key is used (primarily
+# for when bintray artifacts are published to JCenter or Maven).
+    on:
+      repo: RPTools/rplib
+      tags: true
+# (When dpl is fixed, the 'edge' key can be removed.  See travis-ci#9314)
+    edge:
+      branch: v1.8.47

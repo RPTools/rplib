@@ -228,6 +228,7 @@ public class PackedFile {
 				r = getFileAsReader(CONTENT_FILE);
 				String xml = IOUtils.toString(r);
 				xml = versionManager.transform(xml, fileVersion);
+				xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields added.
 				return xstream.fromXML(xml);
 			} else {
 				return getFileObject(CONTENT_FILE);
@@ -406,10 +407,6 @@ public class PackedFile {
 		putFile(CONTENT_FILE, content);
 	}
 
-	public void setContent(Object content, Class omittedClass, String omittedField) throws IOException {
-		putFileWithOmissions(CONTENT_FILE, content, omittedClass, omittedField);
-	}
-
 	/**
 	 * Does the work of preparing for output to a temporary file, returning the {@link File} object associated with the
 	 * temporary location. The caller is then expected to open and write their data to the file which will later be
@@ -494,20 +491,6 @@ public class PackedFile {
 		IOUtils.closeQuietly(bw);
 	}
 
-	// This method can remove a Class.field for backwards compatibility, i.e. LightSource.lumens for b89 compatibility
-	public void putFileWithOmissions(String path, Object obj, Class omittedClass, String omittedField) throws IOException {
-		File explodedFile = putFileImpl(path);
-		FileOutputStream fos = new FileOutputStream(explodedFile);
-		OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
-		BufferedWriter bw = new BufferedWriter(osw);
-
-		xstream.omitField(omittedClass, omittedField);
-		xstream.toXML(obj, bw);
-
-		bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
-		IOUtils.closeQuietly(bw);
-	}
-
 	/**
 	 * Write the data from the given URL to the path in the ZIP file; as the data is presumed binary there is no
 	 * {@link Charset} conversion.
@@ -572,6 +555,7 @@ public class PackedFile {
 		LineNumberReader r = getFileAsReader(path);
 		Object o = null;
 		try {
+			xstream.ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields added.		
 			o = xstream.fromXML(r);
 		} catch (InstantiationError ie) {
 			log.error("Found at line number " + r.getLineNumber());

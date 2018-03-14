@@ -17,8 +17,17 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Paint;
+import java.awt.Rectangle;
+import java.awt.TexturePaint;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
@@ -56,10 +65,19 @@ public class PaintedPanel extends JPanel {
 			((Graphics2D) g).setPaint(paint);
 			g.fillRect(0, 0, size.width, size.height);
 		} else {
-			g.setColor(Color.white);
-			g.fillRect(0, 0, size.width, size.height);
-			g.setColor(Color.red);
-			g.drawLine(size.width - 1, 0, 0, size.height - 1);
+			try {
+				BufferedImage texture;
+				texture = ImageIO.read(getClass().getResource("/net/rptools/lib/image/icons/transparent2.png"));
+				TexturePaint tp = new TexturePaint(texture, new Rectangle(0, 0, 28, 28));
+				((Graphics2D) g).setPaint(tp);
+				g.fillRect(0, 0, size.width, size.height);
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				g.setColor(Color.white);
+				g.fillRect(0, 0, size.width, size.height);
+				g.setColor(Color.red);
+				g.drawLine(size.width - 1, 0, 0, size.height - 1);
+			}
 		}
 	}
 }
