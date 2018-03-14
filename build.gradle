@@ -60,9 +60,13 @@ version = getVersionName()
 task createBintrayDeploymentDescription(type: Copy) {
     from 'package'
     into 'package'
-    include 'template.deploy.json'
-    rename { String filename -> filename.replace('template', 'bintray') }
-
+    include 'template.deploy.json', 'template.pom'
+    rename {
+        String filename ->
+            filename.endsWith('.pom')
+            ? filename.replace('template', project.name+'-'+version)
+            : filename.replace('template', 'bintray')
+    }
     // Use some of the filters provided by Ant
     filter(ReplaceTokens, tokens: [
         NAME:           project.name,

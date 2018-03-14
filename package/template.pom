@@ -1,0 +1,6 @@
+<dependency>
+  <groupId>net.rptools.@NAME@</groupId>
+  <artifactId>@NAME@</artifactId>
+  <version>@VERSION@</version>
+  <type>pom</type>
+</dependency>

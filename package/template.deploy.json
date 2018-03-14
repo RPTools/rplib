@@ -22,11 +22,18 @@
     },
 
     "files":
-        [ {
+        [
+        {
             "includePattern": "build/libs/(.*\\.jar)",
             "uploadPattern": "$1",
             "matrixParams": { "override": true }
-        } ],
+        },
+        {
+            "includePattern": "package/bintray.pom",
+            "uploadPattern": "@NAME@-@VERSION@.pom",
+            "matrixParams": { "override": true }
+        }
+        ],
 
     "publish": true
 }

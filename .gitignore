@@ -1,6 +1,10 @@
 .gradle
 build/
 
+# Build artifacts used for bintray/maven deployment
+package/bintray.deploy.json
+package/*-*.pom
+
 # OS generated files
 ################################################################################
 .DS_Store
